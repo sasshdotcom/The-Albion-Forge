@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Albion Forge</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚒️</text></svg>">
+<style>
+:root{
+  --bg:#070b16;--bg2:#0a0f1f;--panel:#0d1428;--field:#0a0f20;
+  --ink:#eef2fb;--muted:#8d97b0;--line:#1c2742;
+  --accent:#3b7bff;--accent2:#6fa2ff;--good:#34d399;--bad:#f87171;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:
+    radial-gradient(1100px 500px at 85% -5%, rgba(59,123,255,.20), transparent 60%),
+    radial-gradient(800px 420px at 10% 0%, rgba(111,162,255,.10), transparent 55%),
+    var(--bg);
+  background-attachment:fixed;
+}
+header{position:sticky;top:0;top:env(safe-area-inset-top,0px);background:rgba(10,15,31,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:10}
+.hdrIn{max-width:980px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.hdrIn h1{
+  font-size:1.15rem;margin:0;white-space:nowrap;font-weight:800;letter-spacing:.2px;
+  background:linear-gradient(90deg,#fff,var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav button{font:inherit;font-size:.9rem;font-weight:600;background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;transition:border-color .15s,background .15s}
+nav button:hover{border-color:var(--accent)}
+nav button.active{background:linear-gradient(135deg,var(--accent),#2756c9);border-color:var(--accent);color:#fff;box-shadow:0 0 0 1px rgba(59,123,255,.4),0 4px 16px rgba(59,123,255,.25)}
+main{max-width:980px;margin:0 auto;padding:22px 16px 48px}
+.sub{color:var(--muted);margin:0 0 18px;max-width:60ch}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:720px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.015),transparent),var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 0 rgba(255,255,255,.02) inset}
+h2{font-size:1rem;margin:0 0 12px;display:flex;align-items:center;justify-content:space-between;color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:44px 1.3fr 1fr .7fr;gap:8px}
+label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
+input,select{width:100%;font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+input::placeholder{color:#55607a}
+input.icon{text-align:center;padding:9px 0;font-size:1.1rem}
+.itemIcon{width:28px;height:28px;object-fit:contain;vertical-align:middle;border-radius:4px;background:var(--field)}
+.recipeRow{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.recipeRow img{width:22px;height:22px}
+input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.hint{font-size:.78rem;color:var(--muted);margin-top:3px}
+.hero{border-color:var(--accent);background:linear-gradient(145deg,rgba(59,123,255,.10),transparent 60%),var(--panel)}
+.big{font-size:2.1rem;font-weight:800;line-height:1.1;margin:2px 0 2px}
+.big.pos{color:var(--good)}.big.neg{color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:.93rem}
+td{padding:7px 0;border-bottom:1px solid var(--line)}
+td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+tr:last-child td{border-bottom:0}
+.note{font-size:.8rem;color:var(--muted);margin-top:12px}
+.ingRow{border-top:1px dashed var(--line);padding-top:10px;margin-top:10px}
+.ingRow:first-of-type{border-top:0;padding-top:0;margin-top:0}
+button.link{background:none;border:0;color:var(--accent2);font:inherit;font-size:.85rem;cursor:pointer;padding:0}
+button.link:hover{text-decoration:underline}
+.ingHead{display:flex;justify-content:space-between;align-items:baseline}
+.ingHead label{margin-top:0}
+.view{display:none}
+.view.active{display:block}
+.noReturnBadge{font-size:.76rem;color:var(--accent2);margin-top:4px;min-height:1em}
+.taxGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.taxOpt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 6px;cursor:pointer;color:var(--ink);text-align:center;transition:border-color .15s,background .15s}
+.taxOpt:hover{border-color:var(--accent2)}
+.taxOpt.active{border-color:var(--accent);background:rgba(59,123,255,.14)}
+.taxName{font-size:.74rem;color:var(--muted)}
+.taxPct{font-size:1.05rem;font-weight:700}
+.taxCustomWrap{cursor:default}
+.taxCustomInput{width:100%;text-align:center;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--ink);font:inherit;font-weight:700;padding:2px 0}
+.taxCustomInput:focus-visible{outline:none;border-color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdrIn">
+    <h1>⚒️ The Albion Forge</h1>
+    <nav id="nav">
+      <button data-view="refine">🧵 Refinado</button>
+      <button data-view="potions">🧪 Pociones</button>
+      <button data-view="food">🍲 Comida</button>
+    </nav>
+  </div>
+</header>
+<main>
+
+<!-- ================= REFINADO ================= -->
+<section id="view-refine" class="view">
+  <h1 style="font-size:1.4rem">Calculadora de refinado</h1>
+  <p class="sub">Cuántas unidades refinadas producirás de verdad con tu retorno de recursos, y cuánta ganancia te deja.</p>
+  <div class="grid">
+    <section class="card">
+      <h2>Datos</h2>
+      <div class="row">
+        <div><label for="r_tier">Tier</label>
+          <select id="r_tier"><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div>
+        <div><label for="r_ench">Encantamiento</label>
+          <select id="r_ench"><option>0</option><option>1</option><option>2</option><option selected>3</option><option>4</option></select></div>
+      </div>
+      <label for="r_name">Nombre del material (opcional)</label>
+      <div class="row3" style="grid-template-columns:44px 1fr">
+        <input id="r_icon" class="icon" maxlength="2" value="🧵">
+        <input id="r_name" placeholder="ej. Tela, Tabla, Barra" value="Tela">
+      </div>
+      <label for="r_fibras">Materia prima que tienes</label><input id="r_fibras" type="number" min="0" value="1500">
+      <div class="row">
+        <div><label for="r_pf">Precio por materia prima</label><input id="r_pf" type="number" min="0" value="5968"></div>
+        <div><label for="r_raw">Materia prima por unidad</label><input id="r_raw" type="number" min="1" value="2"></div>
+      </div>
+      <div class="row">
+        <div><label for="r_pl">Precio material tier inferior</label><input id="r_pl" type="number" min="0" value="180"></div>
+        <div><label for="r_low">Unidades inferiores por unidad</label><input id="r_low" type="number" min="0" value="1"></div>
+      </div>
+      <label for="r_pm">Valor de mercado ya refinado</label><input id="r_pm" type="number" min="0" value="8602">
+      <label>Impuesto de venta</label>
+      <div class="taxGrid">
+        <div class="taxOpt" data-taxval="10.5"><span class="taxName">Sin premium</span><span class="taxPct">10.5%</span></div>
+        <div class="taxOpt" data-taxval="6.5"><span class="taxName">Con premium</span><span class="taxPct">6.5%</span></div>
+        <div class="taxOpt taxCustomWrap"><span class="taxName">Personalizado</span><input class="taxCustomInput" type="number" min="0" step="0.1" placeholder="0"></div>
+      </div>
+      <input type="hidden" id="r_tax" value="0">
+      <div class="hint">Usa Personalizado con el % de descuento si vendes por trade directo.</div>
+      <div class="row">
+        <div><label for="r_ret">Retorno de recursos (%)</label><input id="r_ret" type="number" min="0" max="95" step="0.1" value="36.7"></div>
+        <div><label for="r_rate">Tarifa por 100 de nutrición</label><input id="r_rate" type="number" min="0" value="800"></div>
+      </div>
+      <label for="r_fee">Tarifa por craft (silver)</label><input id="r_fee" type="number" min="0" step="0.1" value="115">
+      <div class="hint">Se calcula sola al cambiar tier, encantamiento o tarifa. Puedes escribirla tú si la estación muestra otra.</div>
+    </section>
+    <div>
+      <section class="card hero">
+        <h2>Ganancia total</h2>
+        <div id="r_total" class="big">0</div>
+        <div id="r_totalSub" class="hint"></div>
+      </section>
+      <section class="card" style="margin-top:16px">
+        <h2>Resultados</h2>
+        <table>
+          <tr><td>Unidades que producirás</td><td id="r_crafts">0</td></tr>
+          <tr><td id="r_lowLabel">Material inferior necesario</td><td id="r_lowNeed">0</td></tr>
+          <tr><td>Costo real por unidad (con retorno)</td><td id="r_unitCost">0</td></tr>
+          <tr><td>Precio de venta por unidad</td><td id="r_unitSell">0</td></tr>
+          <tr><td>Ganancia por unidad</td><td id="r_unitProfit">0</td></tr>
+          <tr><td>Inversión total</td><td id="r_invest">0</td></tr>
+          <tr><td>Ingresos totales</td><td id="r_revenue">0</td></tr>
+          <tr><td>Retorno sobre la inversión</td><td id="r_roi">0</td></tr>
+          <tr><td>Ganancia total a precio completo</td><td id="r_full">0</td></tr>
+        </table>
+        <p class="note">Cada craft consume solo (100 − retorno)% de los materiales.</p>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ================= POCIONES / COMIDA (motor genérico) ================= -->
+<section id="view-potions" class="view">
+  <h1 style="font-size:1.4rem">Calculadora de pociones</h1>
+  <p class="sub">Compras la receta completa para los lotes planeados; el retorno de recursos te da lotes extra gratis.</p>
+  <div id="batch-potions"></div>
+</section>
+
+<section id="view-food" class="view">
+  <h1 style="font-size:1.4rem">Calculadora de comida</h1>
+  <p class="sub">Compras la receta completa para los lotes planeados; el retorno de recursos te da lotes extra gratis.</p>
+  <div id="batch-food"></div>
+</section>
+
+</main>
+<script>
+function $(i){return document.getElementById(i)}
+function n(i){var el=$(i);var v=parseFloat(el&&el.value);return isNaN(v)?0:v}
+function f(x,d){return x.toLocaleString('es',{maximumFractionDigits:d||0,minimumFractionDigits:0})}
+function store(key,obj){try{localStorage.setItem(key,JSON.stringify(obj))}catch(e){}}
+function load(key){try{var v=localStorage.getItem(key);return v?JSON.parse(v):null}catch(e){return null}}
+
+/* Energía Avaloniana no se beneficia del retorno de recursos. Se detecta sola por el
+   id o el nombre del ingrediente (sin checkbox manual) — así cualquier receta avaloniana
+   que agreguemos queda cubierta automáticamente. */
+function isNoReturn(itemId,name){
+  var s=((itemId||'')+' '+(name||'')).toLowerCase();
+  return s.indexOf('avalon')>=0;
+}
+
+/* ---------- selector de impuesto (3 cajas: sin premium / con premium / personalizado) ---------- */
+function syncTaxVisual(root,hiddenEl){
+  var val=parseFloat(hiddenEl.value)||0;
+  var opts=root.querySelectorAll('.taxOpt[data-taxval]');
+  var customWrap=root.querySelector('.taxCustomWrap');
+  var customInput=root.querySelector('.taxCustomInput');
+  var matched=false;
+  opts.forEach(function(o){
+    var ov=parseFloat(o.dataset.taxval);
+    var isMatch=Math.abs(ov-val)<0.001;
+    o.classList.toggle('active',isMatch);
+    if(isMatch)matched=true;
+  });
+  if(customWrap)customWrap.classList.toggle('active',!matched);
+  if(customInput)customInput.value=matched?'':(val||'');
+}
+function wireTaxSelector(root,hiddenEl,onChange){
+  var opts=root.querySelectorAll('.taxOpt[data-taxval]');
+  var customInput=root.querySelector('.taxCustomInput');
+  opts.forEach(function(o){
+    o.addEventListener('click',function(){
+      hiddenEl.value=o.dataset.taxval;
+      syncTaxVisual(root,hiddenEl);
+      onChange();
+    });
+  });
+  if(customInput)customInput.addEventListener('input',function(){
+    hiddenEl.value=customInput.value||0;
+    syncTaxVisual(root,hiddenEl);
+    onChange();
+  });
+  syncTaxVisual(root,hiddenEl);
+}
+
+/* ---------- navegación ---------- */
+var views=['refine','potions','food'];
+function showView(v){
+  if(views.indexOf(v)<0)v='refine';
+  views.forEach(function(x){
+    $('view-'+x).classList.toggle('active',x===v);
+  });
+  document.querySelectorAll('#nav button').forEach(function(b){
+    b.classList.toggle('active',b.dataset.view===v);
+  });
+  location.hash=v;
+}
+document.querySelectorAll('#nav button').forEach(function(b){
+  b.addEventListener('click',function(){showView(b.dataset.view)});
+});
+window.addEventListener('hashchange',function(){showView(location.hash.slice(1))});
+showView(location.hash.slice(1)||'refine');
+
+/* ---------- REFINADO ---------- */
+var RAW={4:2,5:3,6:4,7:5,8:5};
+var R_KEY='albion-tools:refine';
+var R_FIELDS=['r_tier','r_ench','r_icon','r_name','r_fibras','r_pf','r_raw','r_pl','r_low','r_pm','r_tax','r_ret','r_rate','r_fee'];
+function rAutoFee(){
+  var iv=Math.pow(2,n('r_tier'))*Math.pow(2,n('r_ench'));
+  $('r_fee').value=Math.round(iv*0.1125*n('r_rate')/100*10)/10;
+}
+function rCalc(){
+  var keep=1-n('r_ret')/100,raw=n('r_raw'),low=n('r_low');
+  var crafts=raw>0&&keep>0?Math.floor(n('r_fibras')/(raw*keep)):0;
+  var lowNeed=Math.ceil(crafts*low*keep);
+  var mats=(raw*n('r_pf')+low*n('r_pl'))*keep;
+  var unitCost=mats+n('r_fee');
+  var mult=1-n('r_tax')/100;
+  var sell=n('r_pm');
+  var unitProfit=sell*mult-unitCost;
+  var total=unitProfit*crafts,invest=unitCost*crafts;
+  var full=(n('r_pm')*mult-unitCost)*crafts;
+  var icon=$('r_icon').value||'🧵',name=$('r_name').value||'unidad';
+  $('r_crafts').textContent=f(crafts);
+  $('r_lowLabel').textContent='Material T'+(n('r_tier')-1)+' necesario';
+  $('r_lowNeed').textContent=f(lowNeed);
+  $('r_unitCost').textContent=f(unitCost);
+  $('r_unitSell').textContent=f(sell);
+  $('r_unitProfit').textContent=f(unitProfit);
+  $('r_invest').textContent=f(invest);
+  $('r_revenue').textContent=f(sell*mult*crafts);
+  $('r_roi').textContent=invest>0?f(total/invest*100,1)+'%':'0%';
+  $('r_full').textContent=f(full);
+  var t=$('r_total');t.textContent=f(total)+' silver';
+  t.className='big '+(total>=0?'pos':'neg');
+  $('r_totalSub').textContent='Producirás '+f(crafts)+' '+icon+' '+name+' y ganas '+f(unitProfit)+' por cada una.';
+  store(R_KEY,R_FIELDS.reduce(function(o,id){o[id]=$(id).value;return o},{}));
+}
+(function initRefine(){
+  var saved=load(R_KEY);
+  if(saved)R_FIELDS.forEach(function(id){if(saved[id]!=null&&$(id))$(id).value=saved[id]});
+  ['r_tier','r_ench','r_rate'].forEach(function(i){$(i).addEventListener('input',function(){
+    if(i==='r_tier')$('r_raw').value=RAW[n('r_tier')];
+    rAutoFee();rCalc();
+  });});
+  R_FIELDS.filter(function(i){return i!=='r_tier'&&i!=='r_ench'&&i!=='r_rate'}).forEach(function(i){$(i).addEventListener('input',rCalc)});
+  wireTaxSelector($('view-refine'),$('r_tax'),rCalc);
+  rCalc();
+})();
+
+/* ---------- MOTOR GENÉRICO DE LOTES (pociones / comida) ---------- */
+function BatchCalc(containerId, storageKey, cfg){
+  var root=$(containerId);
+  root.innerHTML=
+    '<div class="grid">'+
+    '<section class="card"><h2>Datos</h2>'+
+    (cfg.recipes&&cfg.recipes.length?(
+      '<div class="row">'+
+        '<div><label>Receta</label><select data-role="recipeNameSel"><option value="">— elegir —</option>'+
+          cfg.recipes.map(function(r,i){return '<option value="'+i+'">'+r.name+' (T'+r.tier+')</option>'}).join('')+
+        '</select></div>'+
+        '<div><label>Encantamiento</label><select data-role="recipeEnchSel" disabled><option value="0">.0</option></select></div>'+
+      '</div>'+
+      '<div class="hint">Elige la receta y luego el nivel — los ingredientes base no cambian, solo se agrega la salsa de ese nivel.</div>'
+    ):'')+
+    '<div class="row">'+
+      '<div><label>Cuántos lotes vas a craftear</label><input data-f="lotes" type="number" min="1" value="'+cfg.lotes+'"></div>'+
+      '<div><label>'+cfg.itemLabel+' producidas por lote</label><input data-f="porLote" type="number" min="1" value="'+cfg.porLote+'"></div>'+
+    '</div>'+
+    '<div class="hint">'+cfg.porLoteHint+'</div>'+
+    '<div data-role="ings"></div>'+
+    '<p><button class="link" data-act="addIng" type="button">+ agregar ingrediente</button></p>'+
+    '<div class="hint">Los precios y cantidades de los ingredientes son por lote, no por unidad individual. La Energía Avaloniana se detecta sola y no recibe retorno.</div>'+
+    '<label>Valor de mercado de '+cfg.itemLabel.toLowerCase()+'</label><input data-f="pm" type="number" min="0" value="'+cfg.pm+'">'+
+    '<label>Impuesto de venta</label>'+
+    '<div class="taxGrid">'+
+      '<div class="taxOpt" data-taxval="10.5"><span class="taxName">Sin premium</span><span class="taxPct">10.5%</span></div>'+
+      '<div class="taxOpt" data-taxval="6.5"><span class="taxName">Con premium</span><span class="taxPct">6.5%</span></div>'+
+      '<div class="taxOpt taxCustomWrap"><span class="taxName">Personalizado</span><input class="taxCustomInput" type="number" min="0" step="0.1" placeholder="0"></div>'+
+    '</div>'+
+    '<input type="hidden" data-f="tax" value="0">'+
+    '<div class="hint">Usa Personalizado con el % de descuento si vendes por trade directo.</div>'+
+    '<div class="row">'+
+      '<div><label>Retorno de recursos (%)</label><input data-f="ret" type="number" min="0" max="95" step="0.1" value="'+cfg.ret+'"></div>'+
+      '<div><label>Tarifa de estación por lote (silver)</label><input data-f="fee" type="number" min="0" step="0.1" value="0"></div>'+
+    '</div>'+
+    '</section>'+
+    '<div>'+
+      '<section class="card hero"><h2>Ganancia total</h2><div data-role="total" class="big">0</div><div data-role="totalSub" class="hint"></div></section>'+
+      '<section class="card" style="margin-top:16px"><h2>Resultados</h2><table>'+
+        '<tr><td>Lotes que puedes craftear con lo comprado</td><td data-role="lotesReales">0</td></tr>'+
+        '<tr><td>Lotes extra gratis por el retorno</td><td data-role="lotesExtra">0</td></tr>'+
+        '<tr><td>'+cfg.itemLabel+' que producirás</td><td data-role="crafts">0</td></tr>'+
+        '<tr><td>Costo real por unidad</td><td data-role="unitCost">0</td></tr>'+
+        '<tr><td>Precio de venta por unidad</td><td data-role="unitSell">0</td></tr>'+
+        '<tr><td>Ganancia por unidad</td><td data-role="unitProfit">0</td></tr>'+
+        '<tr><td>Inversión total</td><td data-role="invest">0</td></tr>'+
+        '<tr><td>Ingresos totales</td><td data-role="revenue">0</td></tr>'+
+        '<tr><td>Retorno sobre la inversión</td><td data-role="roi">0</td></tr>'+
+        '<tr><td>Ganancia total a precio completo</td><td data-role="full">0</td></tr>'+
+      '</table>'+
+      '<p class="note">Compras la receta completa para los lotes planeados. El retorno hace que esa compra alcance para más lotes — esos extra son ganancia neta, sin costo adicional. La Energía Avaloniana (si la hay) no se beneficia del retorno, así que el resultado de arriba ya asume que compraste el extra necesario de ella para aprovechar los lotes extra (ver abajo cuánto es).</p>'+
+      '<h2 style="margin-top:18px">Total de ingredientes a comprar</h2><table data-role="ingTotals"></table>'+
+      '<div data-role="noReturnBox"></div>'+
+      '</section>'+
+    '</div></div>';
+
+  var ingsEl=root.querySelector('[data-role=ings]');
+  var ingCount=0;
+
+  function iconImg(id){
+    if(!id)return '';
+    return '<img class="itemIcon" src="https://render.albiononline.com/v1/item/'+id+'.png" alt="" onerror="this.style.visibility=\'hidden\'">';
+  }
+  function addIng(itemId,name,price,qty){
+    ingCount++;
+    var w=document.createElement('div');
+    w.className='ingRow';
+    w.innerHTML=
+      '<div class="ingHead"><label>Ingrediente</label>'+
+      (ingCount>1?'<button class="link" type="button" data-act="rmIng">quitar</button>':'')+
+      '</div><div class="row3">'+
+        '<span data-role="iconPreview">'+iconImg(itemId)+'</span>'+
+        '<input data-role="name" placeholder="Nombre" value="'+(name||'')+'">'+
+        '<input data-role="price" type="number" min="0" placeholder="Precio" value="'+(price!=null?price:'')+'">'+
+        '<input data-role="qty" type="number" min="0" step="0.1" placeholder="Cant./lote" value="'+(qty!=null?qty:1)+'">'+
+      '</div>'+
+      '<label>ID del ítem (para el ícono, ej. T7_CORN)</label>'+
+      '<input data-role="itemId" placeholder="T7_CORN" value="'+(itemId||'')+'">'+
+      '<div data-role="noReturnBadge" class="noReturnBadge"></div>';
+    w.dataset.itemId=itemId||'';
+    function updateBadge(){
+      var idVal=w.querySelector('[data-role=itemId]').value;
+      var nameVal=w.querySelector('[data-role=name]').value;
+      w.querySelector('[data-role=noReturnBadge]').textContent=isNoReturn(idVal,nameVal)?'⚠ No se beneficia del retorno de recursos':'';
+    }
+    w.querySelectorAll('input[data-role]').forEach(function(inp){inp.addEventListener('input',function(){
+      if(inp.getAttribute('data-role')==='itemId'){
+        w.querySelector('[data-role=iconPreview]').innerHTML=iconImg(inp.value.trim());
+      }
+      updateBadge();
+      calc();
+    })});
+    updateBadge();
+    var rm=w.querySelector('[data-act=rmIng]');
+    if(rm)rm.addEventListener('click',function(){w.remove();calc()});
+    ingsEl.appendChild(w);
+  }
+  root.querySelector('[data-act=addIng]').addEventListener('click',function(){addIng('','',0,1)});
+
+  var recipeNameSel=root.querySelector('[data-role=recipeNameSel]');
+  var recipeEnchSel=root.querySelector('[data-role=recipeEnchSel]');
+  function loadRecipe(idx,level){
+    var r=cfg.recipes[idx];
+    ingsEl.innerHTML='';ingCount=0;
+    r.base.forEach(function(i){addIng(i.id,i.name,0,i.qty)});
+    if(level>0){
+      var extra=(r.enchants||[]).find(function(e){return e.level===level});
+      if(extra)addIng(extra.id,extra.name,0,extra.qty);
+    }
+    root.querySelector('[data-f=porLote]').value=r.outputQty;
+    root.querySelector('[data-f=pm]').value=0;
+    calc();
+  }
+  if(recipeNameSel){
+    recipeNameSel.addEventListener('change',function(){
+      var idx=recipeNameSel.value;
+      if(idx===''){recipeEnchSel.innerHTML='<option value="0">.0</option>';recipeEnchSel.disabled=true;return;}
+      var r=cfg.recipes[+idx];
+      var opts='<option value="0">.0</option>';
+      (r.enchants||[]).forEach(function(e){opts+='<option value="'+e.level+'">.'+e.level+'</option>'});
+      recipeEnchSel.innerHTML=opts;
+      recipeEnchSel.disabled=false;
+      loadRecipe(+idx,0);
+    });
+    recipeEnchSel.addEventListener('change',function(){
+      if(recipeNameSel.value==='')return;
+      loadRecipe(+recipeNameSel.value,+recipeEnchSel.value);
+    });
+  }
+
+  function gv(sel){var el=root.querySelector('[data-f='+sel+']');return el?parseFloat(el.value)||0:0}
+  function gt(role){return root.querySelector('[data-role='+role+']')}
+
+  function calc(){
+    var keep=1-gv('ret')/100;
+    var lotesPlan=Math.floor(gv('lotes'));
+    var porLote=gv('porLote')||1;
+    var rows=ingsEl.querySelectorAll('.ingRow');
+    var costPerLoteReturning=0, costPerLoteFixed=0;
+    var html='';
+    var ingData=[];
+    rows.forEach(function(r){
+      var itemId=r.querySelector('[data-role=itemId]').value.trim();
+      var name=r.querySelector('[data-role=name]').value||'Ingrediente';
+      var price=parseFloat(r.querySelector('[data-role=price]').value)||0;
+      var qty=parseFloat(r.querySelector('[data-role=qty]').value)||0;
+      var noReturn=isNoReturn(itemId,name);
+      ingData.push({itemId:itemId,name:name,price:price,qty:qty,noReturn:noReturn});
+      if(noReturn)costPerLoteFixed+=price*qty; else costPerLoteReturning+=price*qty;
+      var totalQty=qty*lotesPlan;
+      var totalCost=totalQty*price;
+      html+='<tr><td>'+iconImg(itemId)+' '+name+(noReturn?' <span class="hint">(no retorna)</span>':'')+'</td><td>'+f(totalQty)+' · '+f(totalCost)+' silver</td></tr>';
+    });
+    gt('ingTotals').innerHTML=html;
+
+    var hasNoReturn=ingData.some(function(i){return i.noReturn});
+    var lotesStretch=keep>0?lotesPlan/keep:lotesPlan;
+    var lotesReales=hasNoReturn?lotesPlan:lotesStretch;
+    var lotesExtra=lotesStretch-lotesPlan;
+    var crafts=lotesReales*porLote;
+
+    var invest=(costPerLoteReturning+costPerLoteFixed)*lotesPlan + gv('fee')*lotesReales;
+
+    var mult=1-gv('tax')/100;
+    var sell=gv('pm');
+    var revenue=sell*mult*crafts;
+    var total=revenue-invest;
+    var unitProfit=crafts>0?total/crafts:0;
+    var unitCost=crafts>0?invest/crafts:0;
+    var full=gv('pm')*mult*crafts-invest;
+
+    gt('lotesReales').textContent=f(lotesReales,1);
+    gt('lotesExtra').textContent=f(hasNoReturn?0:lotesExtra,1);
+    gt('crafts').textContent=f(crafts);
+    gt('unitCost').textContent=f(unitCost);
+    gt('unitSell').textContent=f(sell);
+    gt('unitProfit').textContent=f(unitProfit);
+    gt('invest').textContent=f(invest);
+    gt('revenue').textContent=f(revenue);
+    gt('roi').textContent=invest>0?f(total/invest*100,1)+'%':'0%';
+    gt('full').textContent=f(full);
+    var t=gt('total');t.textContent=f(total)+' silver';
+    t.className='big '+(total>=0?'pos':'neg');
+
+    var noReturnBox=root.querySelector('[data-role=noReturnBox]');
+    if(hasNoReturn && lotesExtra>0.01){
+      var extraIngCost=0;
+      var extraHtml='<p class="note"><strong>Energía Avaloniana — para aprovechar los '+f(lotesExtra,1)+' lotes extra que sí dan los demás ingredientes, tendrías que comprar:</strong></p><table>';
+      ingData.filter(function(i){return i.noReturn}).forEach(function(i){
+        var extraQty=i.qty*lotesExtra;
+        var extraCost=extraQty*i.price;
+        extraIngCost+=extraCost;
+        extraHtml+='<tr><td>'+iconImg(i.itemId)+' '+i.name+'</td><td>+'+f(extraQty)+' · '+f(extraCost)+' silver</td></tr>';
+      });
+      var extraFee=gv('fee')*lotesExtra;
+      var extraCraftsOut=lotesExtra*porLote;
+      var extraRevenue=sell*mult*extraCraftsOut;
+      var extraCostTotal=extraIngCost+extraFee;
+      var extraNetProfit=extraRevenue-extraCostTotal;
+      extraHtml+='</table>'+
+        '<p class="note" style="margin-top:10px"><strong>Si compras eso, el efecto en tu ganancia (sin contar lo ya invertido en los '+f(lotesPlan)+' lotes planeados):</strong></p>'+
+        '<table>'+
+          '<tr><td>Costo extra (ingrediente + tarifa de estación)</td><td>'+f(extraCostTotal)+'</td></tr>'+
+          '<tr><td>Ingresos extra ('+f(extraCraftsOut)+' '+cfg.itemLabel.toLowerCase()+' más)</td><td>'+f(extraRevenue)+'</td></tr>'+
+          '<tr><td><strong>Ganancia neta adicional</strong></td><td><strong>'+f(extraNetProfit)+'</strong></td></tr>'+
+          '<tr><td>Retorno sobre esa compra extra</td><td>'+(extraCostTotal>0?f(extraNetProfit/extraCostTotal*100,1)+'%':'—')+'</td></tr>'+
+        '</table>'+
+        '<p class="note">Esto es aparte de los '+f(lotesPlan)+' lotes que ya tenías planeados — muestra solo si vale la pena esa compra extra puntual.</p>';
+      noReturnBox.innerHTML=extraHtml;
+      gt('totalSub').textContent='Con lo comprado te alcanza para '+f(lotesPlan)+' lotes ('+f(crafts)+' '+cfg.itemLabel.toLowerCase()+'). Los demás ingredientes rinden para '+f(lotesStretch,1)+' lotes — compra el extra de arriba para aprovecharlos.';
+    } else {
+      noReturnBox.innerHTML='';
+      gt('totalSub').textContent='Comprando para '+f(lotesPlan)+' lotes, el retorno te da '+f(lotesReales,1)+' lotes reales ('+f(crafts)+' '+cfg.itemLabel.toLowerCase()+') — ganas '+f(unitProfit)+' por unidad.';
+    }
+
+    var state={lotes:gv('lotes'),porLote:gv('porLote'),pm:gv('pm'),tax:gv('tax'),ret:gv('ret'),fee:gv('fee'),
+      ings:ingData.map(function(i){return{itemId:i.itemId,name:i.name,price:i.price,qty:i.qty}})};
+    store(storageKey,state);
+  }
+
+  root.querySelectorAll('[data-f]').forEach(function(inp){inp.addEventListener('input',calc)});
+
+  var saved=load(storageKey);
+  if(saved){
+    root.querySelector('[data-f=lotes]').value=saved.lotes;
+    root.querySelector('[data-f=porLote]').value=saved.porLote;
+    root.querySelector('[data-f=pm]').value=saved.pm;
+    root.querySelector('[data-f=tax]').value=saved.tax;
+    root.querySelector('[data-f=ret]').value=saved.ret;
+    root.querySelector('[data-f=fee]').value=saved.fee;
+    (saved.ings||[]).forEach(function(i){addIng(i.itemId,i.name,i.price,i.qty)});
+  }else{
+    cfg.defaultIngs.forEach(function(i){addIng(i[0],i[1],i[2],i[3])});
+  }
+  wireTaxSelector(root,root.querySelector('[data-f=tax]'),calc);
+  calc();
+}
+
+/* ---------- RECETAS CONOCIDAS ---------- */
+/* Comida y pociones se craftean directo en el nivel que quieras (no se encantan después,
+   a diferencia del gear). Los ingredientes base NO cambian entre .0, .1, .2 y .3 — solo se
+   agrega UNA salsa de pescado distinta por nivel, siempre en la misma cantidad que pide la
+   receta "para cualquier encantamiento". Llega hasta .3, nunca .4.
+
+   outputQty (unidades que da el craft) es 10 en todas, confirmado por el usuario. Ese campo
+   queda editable en la calculadora por si alguna receta nueva que agregues es distinta.
+
+   Los id de ítem en blanco son ingredientes sin identifier real confirmado (el ícono
+   simplemente no se mostrará hasta que lo completes). La Energía Avaloniana se detecta
+   sola por el nombre, no hace falta marcarla. */
+function ing(id,name,qty){return {id:id,name:name,qty:qty}}
+function sauceEnchants(qty){
+  if(!qty)return undefined;
+  return [
+    {level:1,id:'',name:'Salsa de Pescado Básica',qty:qty},
+    {level:2,id:'',name:'Salsa de Pescado Extravagante',qty:qty},
+    {level:3,id:'',name:'Salsa de Pescado Especial',qty:qty}
+  ];
+}
+function food(name,tier,outputQty,base,salsaQty){
+  return {name:name,tier:tier,outputQty:outputQty,base:base,enchants:sauceEnchants(salsaQty)};
+}
+
+var FOOD_RECIPES=[
+  // ---- T4 ----
+  food('Ensalada de Rábano',4,10,[ing('','Rábanos',24),ing('','Manojos de Trigo',24)],30),
+  food('Ensalada de Pulpo de Aguas Medias',4,10,[ing('','Pulpo de Aguas Medias',1),ing('','Rábanos',2),ing('','Bardana Almenada',2),ing('','Carne de Cabra',2)],9),
+  food('Bocadillo de Cabra',4,10,[ing('','Pan',4),ing('','Carne de Cabra',8),ing('','Manteca de Cabra',2)],10),
+  food('Bocadillo de Cabra Avaloniano',4,10,[ing('','Pan',4),ing('','Carne de Cabra',8),ing('','Manteca de Cabra',2),ing('T4_AVALONIAN_ENERGY','Energía Avaloniana',10)],10),
+  food('Bocadillo de Loncha Pedregosa',4,10,[ing('','Loncha Pedregosa',1),ing('','Rábanos',1),ing('','Manteca de Cabra',1)],3),
+  food('Guiso de Cabra',4,10,[ing('','Rábanos',4),ing('','Pan',4),ing('','Carne de Cabra',8)],10),
+  food('Guiso de Cabra Avaloniano',4,10,[ing('','Rábanos',4),ing('','Zanahorias',4),ing('','Carne de Cabra',8),ing('T4_AVALONIAN_ENERGY','Energía Avaloniana',10)],10),
+  food('Guiso de Anguila de Agua Verdosa',4,10,[ing('','Anguila de Agua Verdosa',1),ing('','Rábanos',1),ing('','Bardana Almenada',1)],3),
+
+  // ---- T5 ----
+  food('Sopa de Col',5,10,[ing('','Coles',144)],90),
+  food('Sopa de Almeja de Pantano Negro',5,10,[ing('','Almeja de Pantano Negro',1),ing('','Coles',6),ing('','Cardo de Dragón',6),ing('','Carne de Ganso',6)],27),
+  food('Tortilla de Ganso',5,10,[ing('','Coles',12),ing('','Carne de Ganso',24),ing('','Huevos de Ganso',6)],30),
+  food('Tortilla de Ganso Avaloniana',5,10,[ing('','Leche de Oveja',12),ing('','Carne de Ganso',24),ing('','Huevos de Ganso',6),ing('T5_AVALONIAN_ENERGY','Energía Avaloniana',30)],30),
+  food('Tortilla de Leyaleta Almabrillante',5,10,[ing('','Leyaleta Almabrillante',1),ing('','Leche de Oveja',2),ing('','Cardo de Dragón',2),ing('','Huevos de Ganso',2)],9),
+  food('Tortilla de Cangrejo de Río',5,10,[ing('','Cangrejo de Río',1),ing('','Coles',2),ing('','Cardo de Dragón',2),ing('','Huevos de Ganso',2)],9),
+  food('Pastel de Ganso',5,10,[ing('','Coles',6),ing('','Harina',12),ing('','Carne de Ganso',24),ing('','Leche de Cabra',6)],30),
+  food('Pastel de Ojo Muerto de las Montañas',5,10,[ing('','Ojo Muerto de las Montañas',1),ing('','Coles',2),ing('','Cardo de Dragón',2),ing('','Huevos de Ganso',2)],9),
+  food('Ganso Asado',5,10,[ing('','Carne de Ganso',24),ing('','Coles',12),ing('','Leche de Oveja',12)],30),
+  food('Pargo de Niebla Ligera Asado',5,10,[ing('','Pargo de Niebla Ligera',1),ing('','Coles',2),ing('','Cardo de Dragón',2),ing('','Leche de Oveja',2)],9),
+
+  // ---- T6 ----
+  food('Ensalada de Patata',6,10,[ing('','Patatas',72),ing('','Coles',72)],90),
+  food('Ensalada de Kraken de Agua Profunda',6,10,[ing('','Kraken de Agua Profunda',1),ing('','Patatas',6),ing('','Dedalera Elusiva',6),ing('','Carne de Carnero',6)],27),
+  food('Bocadillo de Carnero',6,10,[ing('','Pan',12),ing('','Carne de Carnero',24),ing('','Manteca de Oveja',6)],30),
+  food('Bocadillo de Carnero Avaloniano',6,10,[ing('','Pan',12),ing('','Carne de Carnero',24),ing('','Manteca de Oveja',6),ing('T6_AVALONIAN_ENERGY','Energía Avaloniana',30)],30),
+  food('Bocadillo de Loncha de Agua Corriente',6,10,[ing('','Loncha de Agua Corriente',1),ing('','Patatas',2),ing('','Dedalera Elusiva',2),ing('','Manteca de Oveja',2)],9),
+  food('Guiso de Carnero',6,10,[ing('','Patatas',12),ing('','Pan',12),ing('','Carne de Carnero',24)],30),
+  food('Guiso de Carnero Avaloniano',6,10,[ing('','Patatas',12),ing('','Coles',12),ing('','Carne de Carnero',24),ing('T6_AVALONIAN_ENERGY','Energía Avaloniana',30)],30),
+  food('Guiso de Anguila Rojiza',6,10,[ing('','Anguila Rojiza',1),ing('','Patatas',2),ing('','Dedalera Elusiva',2),ing('','Leche de Oveja',2)],9),
+
+  // ---- T7 ----
+  food('Tortilla de Cerdo',7,10,[ing('T7_CORN','Fardo de Maíz',12),ing('T7_MEAT','Carne de Cerdo',72),ing('T5_EGG','Huevos de Ganso',18)],90),
+  food('Tortilla de Cerdo Avaloniana',7,10,[ing('','Leche de Vaca',36),ing('T7_MEAT','Carne de Cerdo',72),ing('T5_EGG','Huevos de Ganso',18),ing('T7_AVALONIAN_ENERGY','Energía Avaloniana',90)],90),
+  food('Tortilla de Leyaleta Dragontina',7,10,[ing('','Leyaleta Dragontina',1),ing('','Gordolobo de Fuego',6),ing('','Cardo de Dragón',6),ing('','Huevos de Ganso',6)],27),
+  food('Tortilla de Cangrejo de Pozo',7,10,[ing('','Cangrejo de Pozo',1),ing('T7_CORN','Fardo de Maíz',6),ing('','Gordolobo de Fuego',6),ing('T7_MEAT','Carne de Cerdo',6)],27),
+  food('Pastel de Cerdo',7,10,[ing('T7_CORN','Fardo de Maíz',18),ing('','Harina',36),ing('T7_MEAT','Carne de Cerdo',72),ing('','Leche de Oveja',18)],90),
+  food('Pastel de Ojo Muerto Dos Picos',7,10,[ing('','Ojo Muerto de Dos Picos',1),ing('T7_CORN','Fardo de Maíz',6),ing('','Gordolobo de Fuego',6),ing('T7_MEAT','Carne de Cerdo',6)],27),
+  food('Cerdo Asado',7,10,[ing('T7_MEAT','Carne de Cerdo',72),ing('T7_CORN','Fardo de Maíz',36),ing('','Leche de Vaca',36)],90),
+  food('Pargo de Niebla Pura Asado',7,10,[ing('','Pargo de Niebla Pura',1),ing('T7_CORN','Fardo de Maíz',6),ing('','Gordolobo de Fuego',6),ing('','Leche de Vaca',6)],27),
+
+  // ---- T8 ----
+  food('Bocadillo de Ternera',8,10,[ing('','Pan',36),ing('','Carne de Ternera',72),ing('','Manteca de Vaca',18)],90),
+  food('Bocadillo de Ternera Avaloniano',8,10,[ing('','Pan',36),ing('','Carne de Ternera',72),ing('','Manteca de Vaca',18),ing('T8_AVALONIAN_ENERGY','Energía Avaloniana',90)],90),
+  food('Bocadillo de Loncha de Trueno',8,10,[ing('','Loncha de Trueno',1),ing('','Calabaza',6),ing('','Milenrama Demoníaca',6),ing('','Manteca de Vaca',6)],27),
+  {name:'Galletas de Huevo de Draco (solo plano)', tier:8, outputQty:10, base:[
+    ing('','Harina',36),ing('','Manteca de Vaca',12),ing('','Leche de Vaca',24),ing('','Huevo de Draco Ala de Fuego',1)
+  ]},
+  food('Guiso de Ternera',8,10,[ing('','Calabaza',36),ing('','Pan',36),ing('','Carne de Ternera',72)],90),
+  food('Guiso de Ternera Avaloniano',8,10,[ing('','Calabaza',36),ing('T8_CORN','Fardo de Maíz',36),ing('','Carne de Ternera',72),ing('T8_AVALONIAN_ENERGY','Energía Avaloniana',90)],90),
+  food('Guiso de Anguila de Agua Podrida',8,10,[ing('','Anguila de Agua Podrida',1),ing('','Calabaza',6),ing('','Milenrama Demoníaca',6),ing('','Leche de Vaca',6)],27)
+];
+
+var POTION_RECIPES=[
+  /* Agrega aquí tus pociones, p. ej. Gigantify Potion T7, con el mismo formato: food('Nombre',tier,outputQty,[ing(...)...],salsaQty) */
+];
+
+BatchCalc('batch-potions','albion-tools:potions',{
+  itemLabel:'Pociones', porLote:5, pm:0, ret:24.8,
+  porLoteHint:'5 es lo normal en la mayoría de pociones. Cambia esto si lleva artefactos.',
+  defaultIngs:[['','Ingrediente 1',0,2],['','Agua',0,1]],
+  recipes:POTION_RECIPES
+});
+BatchCalc('batch-food','albion-tools:food',{
+  itemLabel:'Comidas', porLote:10, pm:0, ret:24.8,
+  porLoteHint:'10 es lo normal en la mayoría de comidas. Cambia esto si tu receta es distinta.',
+  defaultIngs:[['','Ingrediente 1',0,2],['','Agua',0,1]],
+  recipes:FOOD_RECIPES
+});
+</script>
+</body>
+</html>
